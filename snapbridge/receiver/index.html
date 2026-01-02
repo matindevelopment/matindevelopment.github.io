@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+<meta charset="UTF-8">
+<title>دریافت عکس</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<style>
+body{margin:0;font-family:tahoma;background:linear-gradient(160deg,#020617,#0f172a);color:#e5e7eb}
+header{display:flex;justify-content:center;align-items:center;gap:20px;padding:20px}
+.code{font-size:26px;letter-spacing:4px;color:#38bdf8}
+.gallery{padding:20px;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:15px}
+.card{background:rgba(255,255,255,.04);border-radius:16px;overflow:hidden}
+.card img{width:100%}
+a{color:#38bdf8;text-decoration:none}
+</style>
+</head>
+<script>
+  const BASE_URL = window.location.origin + window.location.pathname.split('/').slice(0, -2).join('/');
+</script>
+<body>
+
+<header>
+  <div>
+    <div><i class="fa-solid fa-link"></i> کد اتصال</div>
+    <div class="code" id="code"></div>
+  </div>
+  <img id="qr" width="90">
+</header>
+
+<div class="gallery" id="gallery"></div>
+
+<audio id="notify" src="${BASE_URL}/assets/mp3/notify.mp3" preload="auto"></audio>
+
+<script>
+const myCode=Math.floor(100000+Math.random()*900000);
+code.innerText=myCode;
+qr.src=`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${myCode}`;
+
+let lastCount=0;
+
+function load(){
+  fetch("${BASE_URL}/list.php?code="+myCode)
+  .then(r=>r.json())
+  .then(d=>{
+    if(d.length>lastCount){
+      document.getElementById("notify").play();
+      lastCount=d.length;
+    }
+    gallery.innerHTML="";
+    d.forEach(f=>{
+      gallery.innerHTML+=`
+      <div class="card">
+        <img src="/send/temp/${myCode}/${f}">
+        <div style="text-align:center;padding:8px">
+          <a href="temp/${myCode}/${f}" download><i class="fa-solid fa-download"></i> دانلود</a>
+        </div>
+      </div>`;
+    });
+  });
+}
+setInterval(load,1200);
+
+window.addEventListener("beforeunload",()=>{
+  navigator.sendBeacon("${BASE_URL}/cleanup.php","code="+myCode);
+});
+</script>
+
+</body>
+</html>

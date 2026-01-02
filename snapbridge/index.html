@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+<meta charset="UTF-8">
+<title>انتخاب نقش</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<style>
+body{
+  margin:0;font-family:tahoma;
+  background:linear-gradient(160deg,#020617,#0f172a);
+  color:#e5e7eb;
+  display:flex;justify-content:center;align-items:center;
+  height:100vh;
+}
+.container{
+  width:100%;max-width:420px;padding:20px;text-align:center;
+}
+.card{
+  background:rgba(255,255,255,.04);
+  border-radius:18px;padding:30px;
+  box-shadow:0 10px 40px rgba(0,0,0,.4);
+  transition:0.2s;
+}
+.card:hover{transform:scale(1.03);}
+h2{margin-bottom:20px;font-size:24px;color:#38bdf8;}
+.role-btn{
+  width:100%;padding:14px;margin:10px 0;border:none;border-radius:14px;
+  font-weight:bold;font-size:16px;cursor:pointer;
+  background:linear-gradient(135deg,#38bdf8,#0ea5e9);
+  color:#000;transition:0.2s;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+}
+.role-btn:hover{transform:scale(1.05);}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="card">
+    <h2>نقش شما چیست؟</h2>
+    <button class="role-btn" onclick="goRole('sender')">
+      <i class="fa-solid fa-upload"></i> فرستنده
+    </button>
+    <button class="role-btn" onclick="goRole('receiver')">
+      <i class="fa-solid fa-download"></i> گیرنده
+    </button>
+  </div>
+</div>
+
+<script>
+function goRole(page){
+  window.location.href = page;
+}
+</script>
+
+</body>
+</html>

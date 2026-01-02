@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+<meta charset="UTF-8">
+<title>ارسال عکس</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<style>
+body{
+  margin:0;font-family:tahoma;
+  background:linear-gradient(160deg,#020617,#0f172a);
+  color:#e5e7eb;display:flex;justify-content:center
+}
+.container{width:100%;max-width:420px;padding:20px}
+.card{background:rgba(255,255,255,.04);border-radius:18px;padding:18px}
+input{width:100%;padding:12px;border-radius:12px;border:none;background:#020617;color:#fff;margin-bottom:10px}
+video{width:100%;border-radius:16px;margin:10px 0}
+.row{display:flex;gap:10px}
+.btn{
+  flex:1;padding:12px;border:none;border-radius:14px;
+  background:linear-gradient(135deg,#38bdf8,#0ea5e9);
+  color:#000;font-weight:bold;display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.upload label{display:block;padding:12px;border:2px dashed #38bdf8;border-radius:14px;text-align:center;cursor:pointer}
+.upload input{display:none}
+small{opacity:.7;text-align:center;display:block;margin-top:5px}
+input{
+    margin-left: -11px;
+}
+</style>
+</head>
+<script>
+  const BASE_URL = window.location.origin + window.location.pathname.split('/').slice(0, -2).join('/');
+</script>
+
+<body>
+
+<div class="container">
+<div class="card">
+<h3 style="text-align:center"><i class="fa-solid fa-camera"></i> ارسال عکس</h3>
+
+<input id="code" placeholder="کد اتصال ۶ رقمی">
+
+<video id="video" autoplay playsinline></video>
+
+<div class="row">
+  <button class="btn" onclick="takePhoto()"><i class="fa-solid fa-camera-retro"></i> عکس</button>
+  <button class="btn" onclick="switchCam()"><i class="fa-solid fa-camera-rotate"></i> دوربین</button>
+</div>
+
+<div class="upload">
+<label id="fileLabel">
+<i class="fa-solid fa-folder-open"></i> انتخاب فایل
+<input type="file" accept=".jpg,.jpeg,.png" onchange="uploadFile(this)">
+</label>
+</div>
+
+<small><i class="fa-solid fa-qrcode"></i> اسکن QR → ورود خودکار کد</small>
+</div>
+</div>
+
+<canvas id="canvas" hidden></canvas>
+<audio id="shutter" src="${BASE_URL}/assets/mp3/shutter.mp3" preload="auto"></audio>
+
+<script>
+let facing="environment", stream;
+const video=document.getElementById("video");
+const canvas=document.getElementById("canvas");
+
+async function startCam(){
+  if(stream) stream.getTracks().forEach(t=>t.stop());
+  stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:facing}});
+  video.srcObject=stream;
+}
+startCam();
+
+function switchCam(){
+  facing = facing==="environment" ? "user" : "environment";
+  startCam();
+}
+
+function send(blob){
+  if(!code.value) return alert("کد اتصال را وارد کن");
+  const f=new FormData();
+  f.append("img", blob);
+  f.append("code", code.value);
+  fetch("${BASE_URL}/upload.php",{method:"POST",body:f});
+}
+
+function takePhoto(){
+  document.getElementById("shutter").play();
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  canvas.getContext("2d").drawImage(video,0,0);
+  canvas.toBlob(b => send(b),"image/jpeg",0.9);
+}
+
+function uploadFile(input){
+  const file = input.files[0];
+  if(!file) return;
+  if(!["image/jpeg","image/png","image/jpg"].includes(file.type)){
+    alert("فرمت مجاز نیست"); return;
+  }
+  const f = new FormData();
+  f.append("img", file);
+  f.append("code", code.value);
+
+  fetch("${BASE_URL}/upload.php", {method:"POST", body: f})
+  .then(res => {
+    const label = document.getElementById("fileLabel");
+    label.innerHTML = '<i class="fa-solid fa-check"></i> ارسال شد';
+    setTimeout(() => { label.innerHTML = '<i class="fa-solid fa-folder-open"></i> انتخاب فایل'; }, 2000);
+    input.value = "";
+  })
+  .catch(err => { alert("ارسال با مشکل مواجه شد!"); });
+}
+
+// QR Scan
+if('BarcodeDetector' in window){
+  const detector = new BarcodeDetector({formats:["qr_code"]});
+  setInterval(async ()=>{
+    if(!video.videoWidth) return;
+    const bmp = await createImageBitmap(video);
+    const codes = await detector.detect(bmp);
+    if(codes.length) code.value = codes[0].rawValue;
+  },1000);
+}
+</script>
+
+</body>
+</html>
