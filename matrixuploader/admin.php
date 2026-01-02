@@ -3,7 +3,7 @@ session_start();
 
 // Predefined credentials
 $username = 'Matin';
-$hashedPassword = password_hash('Matin1388', PASSWORD_DEFAULT);
+$hashedPassword = password_hash('matindevelopment', PASSWORD_DEFAULT);
 
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
@@ -153,4 +153,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_file'])) {
     });
   </script>
 </body>
+
 </html>
